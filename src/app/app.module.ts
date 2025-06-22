@@ -7,6 +7,7 @@ import { AdminModule } from './admin/admin.module';
 
 import { HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './login/login.component';
+import { FormsModule } from '@angular/forms';
 
 
 @NgModule({
@@ -19,6 +20,7 @@ import { LoginComponent } from './login/login.component';
     BrowserModule,
     AppRoutingModule,
     AdminModule,
+    FormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

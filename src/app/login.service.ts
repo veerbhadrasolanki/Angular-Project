@@ -7,26 +7,28 @@ import { map } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root'
 })
+
 export class LoginService {
 
   constructor(private httpClient: HttpClient) { 
 
   }
 
-  currentUserName: string = "";
+  currentUserName: any = null;
 
   public Login(loginViewModel: LoginViewModel): Observable<any>{
     return this.httpClient.post<any>("http://localhost:9090/authenticate", loginViewModel, {responseType: "json"})
     .pipe(map(user => {
+      console.log(user);
       if(user){
-        this.currentUserName = user.UserName;
+        this.currentUserName = user.userName;
       }
       return user;
     }))
   }
 
   public Logout(){
-    this.currentUserName = "";
+    this.currentUserName = null;
   }
 
 }
