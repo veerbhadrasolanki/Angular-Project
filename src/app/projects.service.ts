@@ -1,8 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Project } from './project';
-import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
 import {map} from 'rxjs/operators';
 
 @Injectable({
@@ -18,7 +17,15 @@ export class ProjectsService {
   //GET API
   getAllProjects(): Observable<Project[]>
   {
-    return this.httpClient.get<Project[]>("http://localhost:9090/api/Projects",{responseType:"json"})
+    var currentUser = { Token : "" };
+    var headers = new HttpHeaders();
+    headers = headers.set("authentication","Bearer");
+    if(sessionStorage['currentUser'] != null){
+      currentUser = JSON.parse(sessionStorage['currentUser']);
+      headers = headers.set("authentication", "Bearer" + currentUser.Token);
+    }
+
+    return this.httpClient.get<Project[]>("http://localhost:9090/api/Projects",{ headers: headers, responseType:"json"})
     .pipe(map(
       (data: Project[]) => {
         for(var i=0; i<data.length; i++){
