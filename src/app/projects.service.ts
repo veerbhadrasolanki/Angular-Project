@@ -11,7 +11,6 @@ import {map} from 'rxjs/operators';
 export class ProjectsService {
 
   constructor(private httpClient: HttpClient) { 
-
   }
 
   //GET API
