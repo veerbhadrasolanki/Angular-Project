@@ -1,8 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpBackend, HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { LoginViewModel } from './login-view-model';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { JwtHelperService } from '@auth0/angular-jwt';
 
 @Injectable({
   providedIn: 'root'
@@ -10,14 +11,19 @@ import { map } from 'rxjs/operators';
 
 export class LoginService {
 
-  constructor(private httpClient: HttpClient) { 
+  private httpClient: HttpClient | null = null;
 
+  constructor(private httpBackend: HttpBackend, private jwtHelperService: JwtHelperService)
+  {
   }
 
+  urlPrefix: string = "http://localhost:9090";
+  
   currentUserName: any = null;
 
   public Login(loginViewModel: LoginViewModel): Observable<any>{
-    return this.httpClient.post<any>("http://localhost:9090/authenticate", loginViewModel, {responseType: "json"})
+    this.httpClient = new HttpClient(this.httpBackend); // To not use interceptor here.
+    return this.httpClient.post<any>(this.urlPrefix+ "/authenticate", loginViewModel, {responseType: "json"})
     .pipe(map(user => {
       console.log(user);
       if(user){
@@ -33,4 +39,16 @@ export class LoginService {
     this.currentUserName = null;
   }
 
+  public isAuthenticated(): boolean
+  {
+    var token = sessionStorage.getItem("currentUser") ? JSON.parse(sessionStorage.getItem("currentUser") as any).token : null;
+    if (this.jwtHelperService.isTokenExpired())
+    {
+      return false; //token is not valid
+    }
+    else
+    {
+      return true; //token is valid
+    }
+  }
 }

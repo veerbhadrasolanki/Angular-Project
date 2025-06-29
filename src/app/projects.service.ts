@@ -13,18 +13,22 @@ export class ProjectsService {
   constructor(private httpClient: HttpClient) { 
   }
 
+  urlPrefix: string = "http://localhost:9090"; //make this as empty ("") if you are using asp.net core [without CORS]
+
   //GET API
   getAllProjects(): Observable<Project[]>
   {
-    var currentUser = { Token : "" };
-    var headers = new HttpHeaders();
-    headers = headers.set("authentication","Bearer");
-    if(sessionStorage['currentUser'] != null){
-      currentUser = JSON.parse(sessionStorage['currentUser']);
-      headers = headers.set("authentication", "Bearer" + currentUser.Token);
-    }
+    /* Add using Middle Interceptor */
 
-    return this.httpClient.get<Project[]>("http://localhost:9090/api/Projects",{ headers: headers, responseType:"json"})
+    //var currentUser = { token : "" };
+    //var headers = new HttpHeaders();
+    //headers = headers.set("Authorization","Bearer");
+    ///if(sessionStorage['currentUser'] != null){
+    //  currentUser = JSON.parse(sessionStorage['currentUser']);
+    //  headers = headers.set("Authorization", "Bearer " + currentUser.token);
+    //}
+
+    return this.httpClient.get<Project[]>(this.urlPrefix + "/api/Projects",{ responseType:"json"})
     .pipe(map(
       (data: Project[]) => {
         for(var i=0; i<data.length; i++){
@@ -37,22 +41,22 @@ export class ProjectsService {
 
   //Insert API
   insertProject(newProject: Project): Observable<Project>{
-    return this.httpClient.post<Project>("http://localhost:9090/api/Projects",newProject, {responseType:"json"});
+    return this.httpClient.post<Project>(this.urlPrefix + "/api/Projects",newProject, {responseType:"json"});
   }
 
   //Update API
   updateProject(existingProject: Project): Observable<Project>{
-    return this.httpClient.put<Project>("http://localhost:9090/api/Projects", existingProject, {responseType:"json"});
+    return this.httpClient.put<Project>(this.urlPrefix + "/api/Projects", existingProject, {responseType:"json"});
   }
 
   //Delete API
   deleteProject(projectID: number) : Observable<string>{
-    return this.httpClient.delete<string>("http://localhost:9090/api/Projects?ProjectID="+projectID);
+    return this.httpClient.delete<string>(this.urlPrefix + "/api/Projects?ProjectID="+projectID);
   }
 
   //Search API
   SearchProjects(searchBy: string,searchText: string) : Observable<Project[]>{
-    return this.httpClient.get<Project[]>("http://localhost:9090/api/Projects/search/"+searchBy+"/"+searchText,{responseType:"json"});
+    return this.httpClient.get<Project[]>(this.urlPrefix + "/api/Projects/search/"+searchBy+"/"+searchText,{responseType:"json"});
   }
 
 }
