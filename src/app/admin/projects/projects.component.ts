@@ -48,6 +48,10 @@ export class ProjectsComponent implements OnInit{
         this.newProjects.projectName = null;
         this.newProjects.dateOfStart = null;
         this.newProjects.teamSize = null;
+        p.projectID = null;
+        p.dateOfStart = null;
+        p.projectName = null;
+        p.teamSize = null;
     },(error)=>{
       console.log(error.message);
     }
@@ -95,9 +99,9 @@ export class ProjectsComponent implements OnInit{
     this.projectService.deleteProject(this.deleteProject.projectID).subscribe((response)=>{
       this.projects.splice(this.deleteIndex,1);
       this.deleteProject.projectID = null;
-      this.deleteIndex.projectName = null;
-      this.deleteIndex.dateOfStart = null;
-      this.deleteIndex.teamSize = null;
+      this.deleteProject.projectName = null;
+      this.deleteProject.dateOfStart = null;
+      this.deleteProject.teamSize = null;
     },(error)=>{
       console.log(error);
     });
