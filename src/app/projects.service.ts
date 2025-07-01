@@ -41,7 +41,9 @@ export class ProjectsService {
 
   //Insert API
   insertProject(newProject: Project): Observable<Project>{
-    return this.httpClient.post<Project>(this.urlPrefix + "/api/Projects",newProject, {responseType:"json"});
+    var requestHeaders = new HttpHeaders();
+    requestHeaders = requestHeaders.set("X-XSRF-TOKEN", sessionStorage['XSRFRequestToken']);
+    return this.httpClient.post<Project>(this.urlPrefix + "/api/Projects",newProject, {headers: requestHeaders, responseType:"json"});
   }
 
   //Update API

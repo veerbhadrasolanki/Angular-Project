@@ -9,6 +9,7 @@ import { JwtHelperService } from '@auth0/angular-jwt';
   providedIn: 'root'
 })
 
+
 export class LoginService {
 
   private httpClient: HttpClient | null = null;
@@ -18,19 +19,19 @@ export class LoginService {
   }
 
   urlPrefix: string = "http://localhost:9090";
-  
   currentUserName: any = null;
 
   public Login(loginViewModel: LoginViewModel): Observable<any>{
     this.httpClient = new HttpClient(this.httpBackend); // To not use interceptor here.
-    return this.httpClient.post<any>(this.urlPrefix+ "/authenticate", loginViewModel, {responseType: "json"})
-    .pipe(map(user => {
-      console.log(user);
-      if(user){
-        this.currentUserName = user.userName;
-        sessionStorage['currentUser'] = JSON.stringify(user);
+    return this.httpClient.post<any>(this.urlPrefix+ "/authenticate", loginViewModel, {responseType: "json", observe: "response"})
+    .pipe(map(response => {
+      console.log(response);
+      if(response){
+        this.currentUserName = response.body.userName;
+        sessionStorage['currentUser'] = JSON.stringify(response.body);
+        sessionStorage['XSRFRequestToken'] = response.headers.get("XSRF-REQUEST-TOKEN");
       }
-      return user;
+      return response.body;
     }))
   }
 
