@@ -1,93 +1,126 @@
 import { Component, OnInit } from '@angular/core';
-import { ProjectsService } from '../../projects.service';
+import { ProjectsService } from "../../projects.service";
 import { Project } from '../../project';
+import { ClientLocation } from '../../client-location';
+import { ClientLocationsService } from '../../client-locations.service';
 
 @Component({
   selector: 'projects',
   standalone: false,
   templateUrl: './projects.component.html',
-  styleUrl: './projects.component.scss'
+  styleUrls: ['./projects.component.scss']
 })
-
-export class ProjectsComponent implements OnInit{
-  
+export class ProjectsComponent implements OnInit
+{
   projects: Project[] = [];
-  newProjects: Project = new Project();
+  clientLocations: ClientLocation[] = [];
+  showLoading: boolean = true;
+
+  newProject: Project = new Project();
   editProject: Project = new Project();
   editIndex: any = null;
   deleteProject: Project = new Project();
-  deleteIndex : any = null;
-  searchBy: string = "Project Name";
+  deleteIndex: any = null;
+  searchBy: string = "ProjectName";
   searchText: string = "";
 
-  constructor(private projectService: ProjectsService){
-
+  constructor(private projectsService: ProjectsService, private clientLocationsService: ClientLocationsService)
+  {
   }
 
-  ngOnInit(): void {
-    this.projectService.getAllProjects().subscribe(
-      (response: Project[])=>{
+  ngOnInit()
+  {
+    this.projectsService.getAllProjects().subscribe(
+      (response: Project[]) =>
+      {
         this.projects = response;
+        this.showLoading = false;
+      }
+    );
+
+    this.clientLocationsService.getClientLocations().subscribe(
+      (response) =>
+      {
+        this.clientLocations = response;
       }
     );
   }
 
-  onSaveClick(){
-    this.projectService.insertProject(this.newProjects).subscribe(
-      (response)=>{
-        //Add project to GRID
-        var p: Project = new Project();
-        p.projectID = response.projectID;
-        p.projectName = response.projectName;
-        p.dateOfStart = response.dateOfStart;
-        p.teamSize = response.teamSize;
-        this.projects.push(p);
+  onSaveClick()
+  {
+    this.newProject.clientLocation.clientLocationID = 0;
+    this.projectsService.insertProject(this.newProject).subscribe((response) =>
+    {
+      //Add Project to Grid
+      var p: Project = new Project();
+      p.projectID = response.projectID;
+      p.projectName = response.projectName;
+      p.dateOfStart = response.dateOfStart;
+      p.teamSize = response.teamSize;
+      p.clientLocation = response.clientLocation;
+      p.active = response.active;
+      p.clientLocationID = response.clientLocationID;
+      p.status = response.status;
+      this.projects.push(p);
 
-        //Clear New Project  Dailog - TextBoxes
-        this.newProjects.projectID = null;
-        this.newProjects.projectName = null;
-        this.newProjects.dateOfStart = null;
-        this.newProjects.teamSize = null;
-        p.projectID = null;
-        p.dateOfStart = null;
-        p.projectName = null;
-        p.teamSize = null;
-    },(error)=>{
-      console.log(error.message);
-    }
-  );}
-
-
-  onEditClick(event: any, index:number){
-    this.editProject.projectID = this.projects[index].projectID;
-    this.editProject.projectName = this.projects[index].projectName;
-    this.editProject.dateOfStart = this.projects[index].dateOfStart;
-    this.editProject.teamSize = this.projects[index].teamSize;
-    this.editIndex = index;
-  }
-
-  onUpdateClick(){
-    this.projectService.updateProject(this.editProject).subscribe((response: Project)=>{
-       var p: Project = new Project();
-        p.projectID = response.projectID;
-        p.projectName = response.projectName;
-        p.dateOfStart = response.dateOfStart;
-        p.teamSize = response.teamSize;
-        this.projects[this.editIndex] = p;
-
-         //Clear New Project  Dailog - TextBoxes
-        this.newProjects.projectID = null;
-        this.newProjects.projectName = null;
-        this.newProjects.dateOfStart = null;
-        this.newProjects.teamSize = null;
-        this.editIndex = null;
-    },
-    (error)=>{
+      //Clear New Project Dialog - TextBoxes
+      this.newProject.projectID = null;
+      this.newProject.projectName = null;
+      this.newProject.dateOfStart = null;
+      this.newProject.teamSize = null;
+      this.newProject.active = false;
+      this.newProject.clientLocationID = null;
+      this.newProject.status = null;
+    }, (error) =>
+    {
       console.log(error);
     });
   }
 
-  onDeleteClick(event: any, index:number){
+  onEditClick(event: any, index: number)
+  {
+    this.editProject.projectID = this.projects[index].projectID;
+    this.editProject.projectName = this.projects[index].projectName;
+    this.editProject.dateOfStart = this.projects[index].dateOfStart.split("/").reverse().join("-"); //yyyy-MM-dd
+    this.editProject.teamSize = this.projects[index].teamSize;
+    this.editProject.active = this.projects[index].active;
+    this.editProject.clientLocationID = this.projects[index].clientLocationID;
+    this.editProject.clientLocation = this.projects[index].clientLocation;
+    this.editProject.status = this.projects[index].status;
+    this.editIndex = index;
+  }
+
+  onUpdateClick()
+  {
+    this.projectsService.updateProject(this.editProject).subscribe((response: Project) =>
+    {
+      var p: Project = new Project();
+      p.projectID = response.projectID;
+      p.projectName = response.projectName;
+      p.dateOfStart = response.dateOfStart;
+      p.teamSize = response.teamSize;
+      p.clientLocation = response.clientLocation;
+      p.active = response.active;
+      p.clientLocationID = response.clientLocationID;
+      p.status = response.status;
+      this.projects[this.editIndex] = p;
+
+      this.editProject.projectID = null;
+      this.editProject.projectName = null;
+      this.editProject.dateOfStart = null;
+      this.editProject.teamSize = null;
+      this.newProject.active = false;
+      this.newProject.clientLocationID = null;
+      this.newProject.status = null;
+    },
+      (error) =>
+      {
+        console.log(error);
+      });
+  }
+
+  onDeleteClick(event: any, index: number)
+  {
     this.deleteIndex = index;
     this.deleteProject.projectID = this.projects[index].projectID;
     this.deleteProject.projectName = this.projects[index].projectName;
@@ -95,26 +128,33 @@ export class ProjectsComponent implements OnInit{
     this.deleteProject.teamSize = this.projects[index].teamSize;
   }
 
-  onDeleteConfirmClick(){
-    this.projectService.deleteProject(this.deleteProject.projectID).subscribe((response)=>{
-      this.projects.splice(this.deleteIndex,1);
-      this.deleteProject.projectID = null;
-      this.deleteProject.projectName = null;
-      this.deleteProject.dateOfStart = null;
-      this.deleteProject.teamSize = null;
-    },(error)=>{
-      console.log(error);
-    });
-  }
-
-  onSearchClick(){
-    this.projectService.SearchProjects(this.searchBy,this.searchText).subscribe(
-      (response: Project[])=>{
-        this.projects = response;
+  onDeleteConfirmClick()
+  {
+    this.projectsService.deleteProject(this.deleteProject.projectID).subscribe(
+      (response) =>
+      {
+        this.projects.splice(this.deleteIndex, 1);
+        this.deleteProject.projectID = null;
+        this.deleteProject.projectName = null;
+        this.deleteProject.teamSize = null;
+        this.deleteProject.dateOfStart = null;
       },
-      (error)=>{
+      (error) =>
+      {
         console.log(error);
       });
   }
 
+  onSearchClick()
+  {
+    this.projectsService.SearchProjects(this.searchBy, this.searchText).subscribe(
+      (response: Project[]) =>
+      {
+        this.projects = response;
+      },
+      (error) => 
+      {
+        console.log(error);
+      });
+  }
 }
