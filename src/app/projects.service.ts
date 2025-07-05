@@ -39,6 +39,12 @@ export class ProjectsService {
     ))
   }
 
+  getProjectByProjectID(ProjectID: number): Observable<Project>
+  {
+    return this.httpClient.get<Project>(this.urlPrefix + "/api/projects/searchbyprojectid/" + ProjectID, { responseType: "json" });
+  }
+
+
   //Insert API
   insertProject(newProject: Project): Observable<Project>{
     var requestHeaders = new HttpHeaders();
